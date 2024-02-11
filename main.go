@@ -6,8 +6,15 @@
 
 package main
 
-import "fmt"
+import (
+	"github.com/mstarongithub/way2gay/repl"
+)
 
 func main() {
-	fmt.Println("Hello World")
+	repl := repl.NewRepl(nil, nil)
+	repl.Run(msgHandler)
+}
+
+func msgHandler(in string, r *repl.Repl) (string, error) {
+	return in, nil
 }
