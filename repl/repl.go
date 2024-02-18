@@ -8,6 +8,7 @@ package repl
 
 import (
 	"bufio"
+	"fmt"
 	"io"
 	"os"
 )
@@ -52,18 +53,19 @@ func NewRepl(in ReadCloser, out io.WriteCloser) Repl {
 // If it receives an error from the message handler or during writing, it calls Close
 func (r *Repl) Run(onMessage MessageHandler) error {
 	for r.scanner.Scan() {
-		res, err := onMessage(r.scanner.Text(), r)
+		newMessage := r.scanner.Text()
+		res, err := onMessage(newMessage, r)
 		if err != nil {
 			r.Close()
-			return err
+			return fmt.Errorf("message handler errored out on message \"%s\": %w", newMessage, err)
 		}
 		if _, err = r.writer.WriteString(res + "\n"); err != nil {
 			r.Close()
-			return err
+			return fmt.Errorf("failed to write result \"%s\": %w", res, err)
 		}
 		if err = r.writer.Flush(); err != nil {
 			r.Close()
-			return err
+			return fmt.Errorf("failed to flush writer: %w", err)
 		}
 	}
 	return nil

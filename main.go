@@ -1,20 +1,60 @@
-// Copyright (c) 2024 mStar
-//
-// This Source Code Form is subject to the terms of the Mozilla Public
-// License, v. 2.0. If a copy of the MPL was not distributed with this
-// file, You can obtain one at http://mozilla.org/MPL/2.0/.
-
 package main
 
 import (
-	"github.com/mstarongithub/way2gay/repl"
+	"flag"
+	"fmt"
+
+	"os"
+	"os/exec"
+	"runtime"
+
+	"github.com/swaywm/go-wlroots/wlroots"
 )
 
-func main() {
-	repl := repl.NewRepl(nil, nil)
-	repl.Run(msgHandler)
+var (
+	command = flag.String("s", "", "startup command")
+)
+
+func fatal(msg string, err error) {
+	fmt.Printf("error %s: %s\n", msg, err)
+	os.Exit(1)
 }
 
-func msgHandler(in string, r *repl.Repl) (string, error) {
-	return in, nil
+func init() {
+	// lock the main goroutine onto the current OS thread
+	// we need to do this because EGL uses thread local storage
+	runtime.LockOSThread()
+}
+
+func main() {
+
+	flag.Parse()
+
+	// set up logging
+	// programLevel.Set(slog.LevelDebug)
+	wlroots.OnLog(wlroots.LogImportanceDebug, nil)
+
+	// start the server
+	server, err := NewServer()
+	if err != nil {
+		fatal("initializing server", err)
+	}
+	if err = server.Start(); err != nil {
+		fatal("starting server", err)
+	}
+
+	// run the startup command if given
+	if *command != "" {
+		cmd := exec.Command("/bin/sh", "-c", *command)
+		cmd.Stdout = os.Stdout
+		cmd.Stderr = os.Stderr
+		if err = cmd.Start(); err != nil {
+			fatal("running startup command", err)
+		}
+	}
+
+	// start the wayland event loop
+	if err = server.Run(); err != nil {
+		fatal("running server", err)
+	}
 }
