@@ -744,7 +744,7 @@ func (server *Server) Start() error {
 		server.backend.Destroy()
 		return err
 	}
-
+	logrus.WithField("socket", socket).Debugln("got wl socket")
 	/* Start the backend. This will enumerate outputs and inputs, become the DRM
 	 * master, etc */
 	if err = server.backend.Start(); err != nil {
@@ -755,6 +755,9 @@ func (server *Server) Start() error {
 
 	/* Set the WAYLAND_DISPLAY environment variable to our socket and run the
 	 * startup command if requested. */
+	if res := os.Getenv("WAYLAND_DISPLAY"); res != "" {
+		logrus.WithField("WAYLAND_DISPLAY", res).Debugln("Wayland display already set, overwriting")
+	}
 	if err = os.Setenv("WAYLAND_DISPLAY", socket); err != nil {
 		return err
 	}
