@@ -783,3 +783,7 @@ func (server *Server) Run() error {
 	server.display.Destroy()
 	return nil
 }
+
+func (server *Server) Stop() {
+	server.display.Terminate()
+}
