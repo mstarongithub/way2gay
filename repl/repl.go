@@ -22,8 +22,8 @@ type ReadCloser interface {
 }
 
 type Repl struct {
-	input   ReadCloser
-	output  io.WriteCloser
+	Input   ReadCloser
+	Output  io.WriteCloser
 	scanner *bufio.Scanner
 	writer  *bufio.Writer
 }
@@ -40,8 +40,8 @@ func NewRepl(in ReadCloser, out io.WriteCloser) Repl {
 		out = os.Stdout
 	}
 	return Repl{
-		input:   in,
-		output:  out,
+		Input:   in,
+		Output:  out,
 		scanner: bufio.NewScanner(in),
 		writer:  bufio.NewWriter(out),
 	}
@@ -74,6 +74,6 @@ func (r *Repl) Run(onMessage MessageHandler) error {
 // Close stops the repl if it was still running
 // This will also close the reader and writer
 func (r *Repl) Close() {
-	r.input.Close()
-	r.output.Close()
+	r.Input.Close()
+	r.Output.Close()
 }
