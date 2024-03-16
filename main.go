@@ -1,7 +1,6 @@
 package main
 
 import (
-	"flag"
 	"fmt"
 
 	"os"
@@ -19,17 +18,16 @@ func fatal(msg string, err error) {
 func init() {
 	// lock the main goroutine onto the current OS thread
 	// we need to do this because EGL uses thread local storage
+	// So far not found what happens if this isn't done - Melody
 	runtime.LockOSThread()
+
 }
 
 func main() {
-
-	flag.Parse()
-
 	// set up logging
 	logrus.SetLevel(logrus.DebugLevel)
 
-	wlroots.OnLog(wlroots.LogImportanceDebug, func(importance wlroots.LogImportance, msg string) {
+	wlroots.OnLog(wlroots.LogImportanceError, func(importance wlroots.LogImportance, msg string) {
 		switch importance {
 		case wlroots.LogImportanceDebug:
 			logrus.Debugln(msg)

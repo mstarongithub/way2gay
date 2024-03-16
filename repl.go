@@ -62,11 +62,37 @@ func replRunner(server *Server) {
 			case "display":
 				return "Display: No usable data", nil
 			case "backend":
+				return "Backend: No usable data", nil
 			case "renderer":
+				return "Backend: No usable data", nil
 			case "allocator":
+				return fmt.Sprintf("Allocator: nil: %v", server.allocator.Nil()), nil
 			case "scene":
-			case "layout":
-			case "xdgShell":
+				switch mod {
+				case "layout":
+					return "Scene: Layout: No info available", nil
+				default:
+					return fmt.Sprintf("Scene: Tree: %+v", server.scene.Tree()), nil
+				}
+			case "xdg":
+				switch mod {
+				case "shell":
+					return fmt.Sprintf(
+						"xdg-shell: Version %d, Ping Timeout: %d",
+						server.xdgShell.Version(),
+						server.xdgShell.PingTimeout(),
+					), nil
+				case "grabbed-top-level":
+					switch strings.SplitN(args, " ", 1)[0] {
+					case "app-id":
+					case "base":
+					case "parent":
+					case "title":
+
+					default:
+					}
+				default:
+				}
 			case "topLevelList":
 			case "cursor":
 				switch mod {
@@ -93,7 +119,6 @@ func replRunner(server *Server) {
 			case "seat":
 			case "keyboards":
 			case "cursorMode":
-			case "grabbedTopLevel":
 			case "grabLocation":
 			case "grabGeobox":
 			case "edges":

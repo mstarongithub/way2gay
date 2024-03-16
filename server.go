@@ -238,6 +238,8 @@ func (server *Server) handleNewFrame(output wlroots.Output) {
 	/* This function is called every time an output is ready to display a frame,
 	 * generally at the output's refresh rate (e.g. 60Hz). */
 
+	logrus.WithField("name", output.Name()).Debugln("Output ready for frame")
+
 	sOut, err := server.scene.SceneOutput(output)
 	if err != nil {
 		return
@@ -255,17 +257,19 @@ func (server *Server) handleOutputRequestState(output wlroots.Output, state wlro
 	logrus.WithFields(logrus.Fields{
 		"output": output,
 		"state":  state,
-	}).Debugln("handleRequestState")
+	}).Debugln("New state request for output")
 	output.CommitState(state)
 }
 
 func (server *Server) handleOuptuDestroy(output wlroots.Output) {
-	logrus.WithField("output", output).Debugln("handleDestroy")
+	logrus.WithField("name", output.Name()).Debugln("Output getting destroyed")
 }
 
 func (server *Server) handleNewOutput(output wlroots.Output) {
 	/* This event is raised by the backend when a new output (aka a display or
 	 * monitor) becomes available. */
+
+	logrus.WithField("name", output.Name()).Debugln("New output added")
 
 	/* Configures the output created by the backend to use our allocator
 	 * and our renderer. Must be done once, before commiting the output */
@@ -552,17 +556,22 @@ func (server *Server) handleNewXDGSurface(xdgSurface wlroots.XDGSurface) {
 	/* This event is raised when wlr_xdg_shell receives a new xdg xdgSurface from a
 	 * client, either a toplevel (application window) or popup. */
 
+	logrus.WithField("surface", xdgSurface).Debugln("New surface inbound")
+
 	if xdgSurface.Role() == wlroots.XDGSurfaceRolePopup {
 
 		parent := xdgSurface.Popup().Parent()
 		if parent.Nil() {
-			panic("xdgSurface popup parent is nil")
+			logrus.WithField("surface", xdgSurface).Fatalln("xdgSurface popup parent is nil")
 		}
 		xdgSurface.SetData(parent.XDGSurface().SceneTree().NewXDGSurface(xdgSurface))
 		return
 	}
 	if xdgSurface.Role() != wlroots.XDGSurfaceRoleTopLevel {
-		panic("xdgSurface role is not XDGSurfaceRoleTopLevel")
+		logrus.WithFields(logrus.Fields{
+			"surface": xdgSurface,
+			"role":    xdgSurface.Role(),
+		}).Fatalln("xdgSurface role is not XDGSurfaceRoleTopLevel")
 	}
 
 	xdgSurface.SetData(server.scene.Tree().NewXDGSurface(xdgSurface.TopLevel().Base()))

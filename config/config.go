@@ -6,20 +6,27 @@
 
 package config
 
-type StartType int
+type ConfigCommand struct {
+	BaseKey    string   // Main key, for example Meta
+	ModKeys    []string // Modifier keys such as Shift, Control, etc
+	ActionKeys []string // Key to trigger that command
+	Action     string   // Command to run
+}
 
-const (
-	// Tells way2gay to start a repl in parallel for interacting with it
-	START_REPL = StartType(iota)
-	// Tells way2gay to execute a specific command on startup
-	START_SINGLE_COMMAND
-	// Tells way2gay to start without any specific targets
-	// Note: Good luck interacting with it :3
-	START_NONE
-)
+type ConfigScreen struct {
+	Resolution  string  // Resolution the screen will run at (format is "<width>x<height>") (Resolution before Scaler is applied)
+	RefreshRate int     // The refresh rate of the screen
+	Position    string  // Where the screen is positioned in the global space (format is "<x>,<y>")
+	Scaler      float32 // Fractional scaling factor (applied after resolution)
+	// TODO: Check if wlroots dictates the order here in any way
+}
 
 type Config struct {
-	StartType StartType `envconfig:"START_TYPE,omitempty" toml:"start_type,omitempty"`
-	// What command to execute on start. Only matters if StartType is set to START_SINGLE_COMMAND
-	StartCommand *string `envconfig:"START_COMMAND,omitempty" toml:"start_command,omitempty"`
+	// Screen config
+	Screens map[string]string `json:"screens" toml:"screens" yaml:"screens"` // Per screen config. Missing screens will use their preferred mode
+
+	// Commands
+	Commands     map[string]ConfigCommand `json:"commands" toml:"commands" yaml:"commands"`                   // All the commands
+	ExecOnStart  []string                 `json:"exec_on_start" toml:"exec_on_start" yaml:"exec_on_start"`    // Will be run once on start, not on config reload
+	ExecOnReload []string                 `json:"exec_on_reload" toml:"exec_on_reload" yaml:"exec_on_reload"` // Will be run every time the config is reloaded
 }
