@@ -1,58 +1,58 @@
 package main
 
 import (
-	"fmt"
-
-	"os"
+	"flag"
 	"runtime"
 
+	"github.com/mstarongithub/way2gay/config"
 	"github.com/sirupsen/logrus"
-	"github.com/swaywm/go-wlroots/wlroots"
 )
 
-func fatal(msg string, err error) {
-	fmt.Printf("error %s: %s\n", msg, err)
-	os.Exit(1)
-}
+type StartMode int
+
+// Start modes
+const (
+	// Start as compositor
+	START_MODE_COMPOSITOR = StartMode(iota)
+	// Utilise tools, no compositing
+	START_MODE_TOOL
+)
+
+// command line flags
+var (
+	// Path to the config file. Default is "config.toml"
+	configFile *string = flag.String("config", "config.toml", "path to the config file")
+	asTool     *bool   = flag.Bool("tool", false, "start as a tool instead of a compositor")
+)
 
 func init() {
 	// lock the main goroutine onto the current OS thread
 	// we need to do this because EGL uses thread local storage
+	// ----
 	// So far not found what happens if this isn't done - Melody
 	runtime.LockOSThread()
-
 }
 
 func main() {
+	flag.Parse()
+
 	// set up logging
 	logrus.SetLevel(logrus.DebugLevel)
+	logrus.WithFields(logrus.Fields{
+		"configFile": *configFile,
+		"asTool":     *asTool,
+	}).Debugln("Flags")
 
-	wlroots.OnLog(wlroots.LogImportanceError, func(importance wlroots.LogImportance, msg string) {
-		switch importance {
-		case wlroots.LogImportanceDebug:
-			logrus.Debugln(msg)
-		case wlroots.LogImportanceInfo:
-			logrus.Infoln(msg)
-		case wlroots.LogImportanceError:
-			logrus.Errorln(msg)
-		case wlroots.LogImportanceSilent:
-			return
-		}
-	})
-
-	// start the server
-	server, err := NewServer()
+	// Get config
+	conf, err := config.ParseConfig(*configFile)
 	if err != nil {
-		fatal("initializing server", err)
-	}
-	if err = server.Start(); err != nil {
-		fatal("starting server", err)
+		logrus.WithError(err).Warnln("Using config fall-back")
 	}
 
-	go replRunner(server)
-
-	// start the wayland event loop
-	if err = server.Run(); err != nil {
-		fatal("running server", err)
+	// And now run depending on mode
+	if *asTool {
+		utilMain(conf)
+	} else {
+		wlMain(conf)
 	}
 }

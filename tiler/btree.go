@@ -1,6 +1,8 @@
 package tiler
 
 import (
+	"errors"
+	"fmt"
 	"math"
 	"sync"
 
@@ -263,6 +265,8 @@ func (t *Tree) SplitLastFocusedContainer() {
 			Type:   NodeTypeBranch,
 			Branch: &newSplit,
 		}
+		t.LastFocusedParent = &newSplit
+		t.LastFocusedContainer = t.Root.Branch.ChildLeft.Leaf
 	} else {
 		// Todo: Package last focused node into container, replace it with new split, then set left container of new split to last focused and update root
 		// 1. Package last focused node into container
@@ -373,4 +377,59 @@ func (b *Branch) findAndTrace(uID int) (*Leaf, []Node) {
 		return leaf, trace
 	}
 	return nil, []Node{}
+}
+
+func checkNode(node *Node, rangeStart, rangeEnd int) error {
+	if node == nil {
+		return errors.New("node is nil")
+	}
+	if node.Type == NodeTypeBranch {
+		return checkBranch(node)
+	} else if node.Type == NodeTypeLeaf {
+		return checkLeaf(node, rangeStart, rangeEnd)
+	}
+
+	return errors.New("invalid node type")
+}
+
+func checkBranch(node *Node) error {
+	if node == nil {
+		return errors.New("node is nil")
+	}
+	if node.Type != NodeTypeBranch {
+		return errors.New("node not a branch")
+	}
+	if node.Branch == nil {
+		return errors.New("stored branch is nil")
+	}
+	if node.Branch.idRangeEnd < node.Branch.idRangeStart {
+		return fmt.Errorf("invalid ID range: %d - %d", node.Branch.idRangeStart, node.Branch.idRangeEnd)
+	}
+
+	if err := checkNode(&node.Branch.ChildLeft, node.Branch.idRangeStart, node.Branch.idRangeEnd); err != nil {
+		return fmt.Errorf("Left child: %w", err)
+	}
+
+	if err := checkNode(&node.Branch.ChildRight, node.Branch.idRangeStart, node.Branch.idRangeEnd); err != nil {
+		return fmt.Errorf("Left child: %w", err)
+	}
+
+	return nil
+}
+
+func checkLeaf(node *Node, rangeStart, rangeEnd int) error {
+	if node == nil {
+		return errors.New("node is nil")
+	}
+	if node.Type != NodeTypeLeaf {
+		return errors.New("node not a leaf")
+	}
+	if node.Leaf == nil {
+		return errors.New("leaf is nil")
+	}
+	if node.Leaf.leafID < rangeStart || node.Leaf.leafID >= rangeEnd {
+		return fmt.Errorf("leaf ID %v out of range (%v, %v)", node.Leaf.leafID, rangeStart, rangeEnd)
+	}
+
+	return nil
 }
