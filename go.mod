@@ -10,6 +10,7 @@ require (
 require (
 	github.com/adrg/xdg v0.4.0 // indirect
 	github.com/pelletier/go-toml v1.9.5 // indirect
+	gitlab.com/mstarongitlab/goutils v0.0.0-20240221131250-70f6d1947636
 	golang.org/x/sys v0.15.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )

@@ -14,6 +14,8 @@ github.com/stretchr/testify v1.7.0 h1:nwc3DEeHmmLAfoZucVR881uASk0Mfjw8xYJ99tb5Cc
 github.com/stretchr/testify v1.7.0/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/h/Wwjteg=
 github.com/swaywm/go-wlroots v0.0.0-20240123175825-706ab990c3bd h1:K25ennLios3D/e1ycZoXP3o8ODA51Wtc1yDAiABuIKA=
 github.com/swaywm/go-wlroots v0.0.0-20240123175825-706ab990c3bd/go.mod h1:/IIoMSz2jpiER35QG5uma2Jz3Mg4n2v8klw6JgpO7ms=
+gitlab.com/mstarongitlab/goutils v0.0.0-20240221131250-70f6d1947636 h1:HbPPcrMIrrghBK4X/rZf5voxYsd///Cb7PFJSuEqJzU=
+gitlab.com/mstarongitlab/goutils v0.0.0-20240221131250-70f6d1947636/go.mod h1:SvqfzFxgashuZPqR9kPwQ9gFA7I1yskZjhmGmY2pAow=
 golang.org/x/sys v0.0.0-20211025201205-69cdffdb9359/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
 golang.org/x/sys v0.0.0-20220715151400-c0bba94af5f8/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
 golang.org/x/sys v0.15.0 h1:h48lPFYpsTvQJZF4EKyI4aLHaev3CxivZmv7yZig9pc=

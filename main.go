@@ -23,6 +23,7 @@ var (
 	// Path to the config file. Default is "config.toml"
 	configFile *string = flag.String("config", "config.toml", "path to the config file")
 	asTool     *bool   = flag.Bool("tool", false, "start as a tool instead of a compositor")
+	help       *bool   = flag.Bool("help", false, "show the help message for the various modes")
 )
 
 func init() {
@@ -37,7 +38,11 @@ func main() {
 	flag.Parse()
 
 	// set up logging
-	logrus.SetLevel(logrus.DebugLevel)
+	if *help || *asTool {
+		logrus.SetLevel(logrus.ErrorLevel)
+	} else {
+		logrus.SetLevel(logrus.DebugLevel)
+	}
 	logrus.WithFields(logrus.Fields{
 		"configFile": *configFile,
 		"asTool":     *asTool,

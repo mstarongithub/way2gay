@@ -20,7 +20,7 @@ const (
 )
 
 type Server struct {
-	display     wlroots.Display
+	display     wlroots.Display // TODO: Refactor into slice of displays
 	backend     wlroots.Backend
 	renderer    wlroots.Renderer
 	allocator   wlroots.Allocator
@@ -42,6 +42,8 @@ type Server struct {
 	resizeEdges     wlroots.Edges
 
 	outputLayout wlroots.OutputLayout
+
+	outputs []*wlroots.Output
 }
 
 type Keyboard struct {
@@ -265,11 +267,13 @@ func (server *Server) handleOuptuDestroy(output wlroots.Output) {
 	logrus.WithField("name", output.Name()).Debugln("Output getting destroyed")
 }
 
+// TODO: Somehow add a method to get all available outputs
 func (server *Server) handleNewOutput(output wlroots.Output) {
 	/* This event is raised by the backend when a new output (aka a display or
 	 * monitor) becomes available. */
 
 	logrus.WithField("name", output.Name()).Debugln("New output added")
+	server.outputs = append(server.outputs, &output)
 
 	/* Configures the output created by the backend to use our allocator
 	 * and our renderer. Must be done once, before commiting the output */
@@ -628,6 +632,10 @@ func (server *Server) beginInteractive(topLevel *wlroots.XDGTopLevel, mode Curso
 
 		server.resizeEdges = edges
 	}
+}
+
+func (server *Server) GetOutputs() []*wlroots.Output {
+	return server.outputs
 }
 
 func NewServer() (server *Server, err error) {
